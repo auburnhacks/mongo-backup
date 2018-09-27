@@ -21,6 +21,23 @@ parser.add_argument("--mongo_url", help="A mongodb uri that needs to be connecte
 def backup_mongo(netloc: str, username: str, password: str,
                 hostname: str, port: int, db: str,
                 output_dir: str) -> bool:
+  """
+    backup_mongo is a function that uses the subprocess library to 
+    run the mongodump command and collects the output from the
+    output_dir.
+
+    Args:
+    :netloc     string
+    :username   string
+    :password   string
+    :hostname   string
+    :port:      int
+    :db         string
+    :output_dir string
+
+    :return bool that indicates when the function has
+                 returned successfully
+  """
   backup_output = subprocess.check_output([
     "mongodump",
     "--host", "{}".format(hostname),
@@ -68,7 +85,9 @@ def main():
       )
       log.info("backed up: {}".format(is_backed))
   except subprocess.CalledProcessError as e:
-    log.error(e)
+    log.error("error processing command exited with: {}".format(e.returncode))
+    log.error("output from error: {}".format(e.output))
+    sys.exit(1)
 
 if __name__ == "__main__":
   main()
