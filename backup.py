@@ -7,7 +7,7 @@ import subprocess
 from urllib.parse import urlparse
 
 # log config
-logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='[%(asctime)s - %(levelname)s]: %(message)s', level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 # Create global argument parser for the script
@@ -83,7 +83,8 @@ def main():
         url.path[1:],
         output_dir
       )
-      log.info("backed up: {}".format(is_backed))
+      if is_backed:
+        log.info("backup successful startedAt: {} endedAt: {}".format(today, datetime.datetime.now()))
   except subprocess.CalledProcessError as e:
     log.error("error processing command exited with: {}".format(e.returncode))
     log.error("output from error: {}".format(e.output))
