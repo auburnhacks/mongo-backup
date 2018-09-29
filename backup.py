@@ -96,15 +96,26 @@ def cloud_upload(bucket_name: str, archive_name: str, archive_loc: str) -> bool:
   log.info("file {} uploaded".format(archive_name))
   return True
 
+def save_cred_file() -> bool:
+  gcs_data = os.environ['GCS_SECRETS']
+  fhandle = open('auburn-hacks-gcs.json', 'w')
+  fhandle.write(gcs_data)
+  fhandle.close()
+  return True
+
+
 def main():
   args = parser.parse_args()
   today = datetime.datetime.now()
   log.info("starting mongo-backup at {}".format(today))
   log.info("mongo instance provided: {}".format(args.mongo_url))
   log.info("google drive folderId: {}".format(args.folder_id))
+
   if args.kube:
-    # TODO: create function to download gcs token data
     log.info("job running in kubernetes mode.")
+    log.info("saving credentials file...")
+    if save_cred_file():
+      log.info("credentials downloaded successfully")
   else:
     log.info("job running in normal mode.")
 
