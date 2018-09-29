@@ -16,7 +16,6 @@ parser = argparse.ArgumentParser(description="A cron job that backups mongodb to
 
 parser.add_argument("--bucket_name", help="GCS bucket name")
 parser.add_argument("--output_dir", help="Local output directory", default="./")
-parser.add_argument("--folder_id", help="Google drive folderId", default="23r2d23d")
 parser.add_argument("--kube", help="Set this flags if the job in running on kubernetes", action="store_true")
 parser.add_argument("--mongo_url", help="A mongodb uri that needs to be connected", default="mongodb://localhost:27017")
 
