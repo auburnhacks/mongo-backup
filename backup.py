@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 # Create global argument parser for the script
 parser = argparse.ArgumentParser(description="A cron job that backups mongodb to a specific folder in google drive")
 
+parser.add_argument("--bucket_name", help="GCS bucket name")
 parser.add_argument("--output_dir", help="Local output directory", default="./")
 parser.add_argument("--folder_id", help="Google drive folderId", default="23r2d23d")
 parser.add_argument("--kube", help="Set this flags if the job in running on kubernetes", action="store_true")
@@ -84,10 +85,9 @@ def cleanup(archive_loc: str, output_dir: str) -> bool:
   log.info(rm_output_dir)
   return True
 
-def cloud_upload(archive_name: str, archive_loc: str) -> bool:
+def cloud_upload(bucket_name: str, archive_name: str, archive_loc: str) -> bool:
   storage_client = storage.Client()
-  mongo_backup_bucket = "auhack_mongo_backups"
-  bucket = storage_client.get_bucket(mongo_backup_bucket)
+  bucket = storage_client.get_bucket(bucket_name)
   blob = bucket.blob(archive_name)
 
   log.info("uploading the archive from: {}".format(archive_loc))
@@ -111,6 +111,10 @@ def main():
 
   url = urlparse(args.mongo_url)
 
+  if not args.bucket_name:
+    parser.print_help()
+    sys.exit(1)
+  
   # setting the google cloud storage variable
   os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "./auburn-hacks-gcs.json"
   
@@ -148,7 +152,7 @@ def main():
       if zip_backup(archive_name, output_dir):
         log.info("backup zipped successfully")
       
-      cloud_upload(cloud_filename, archive_name)
+      cloud_upload(args.bucket_name, cloud_filename, archive_name)
 
       if cleanup(archive_name, output_dir):
         log.info("sucessfully cleaned up everything")
