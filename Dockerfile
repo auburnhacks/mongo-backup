@@ -1,7 +1,9 @@
-FROM ubuntu:latest
+FROM python:3.6 as build
+COPY requirements.txt .
+RUN pip install --no-cache-dir --install-option="--prefix=/install" -r requirements.txt
+
+FROM python:3.6-alpine
 WORKDIR /app
-RUN apt-get update -y && \
-    apt-get install -y mongodb && \
-    apt-get install -y python3
-COPY backup.py  .
-ENTRYPOINT ["python", "backup.py"]
+COPY --from=build /install /usr/local
+COPY backup.py .
+ENTRYPOINT [ "python", "backup.py" ]
