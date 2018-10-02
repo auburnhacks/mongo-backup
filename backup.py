@@ -109,7 +109,6 @@ def main():
   today = datetime.datetime.now()
   log.info("starting mongo-backup at {}".format(today))
   log.info("mongo instance provided: {}".format(args.mongo_url))
-  log.info("google drive folderId: {}".format(args.folder_id))
 
   if args.kube:
     log.info("job running in kubernetes mode.")
