@@ -96,12 +96,14 @@ def cloud_upload(bucket_name: str, archive_name: str, archive_loc: str) -> bool:
   log.info("file {} uploaded".format(archive_name))
   return True
 
-def save_cred_file() -> bool:
+def save_cred_file() -> str:
   gcs_data = os.environ['GCS_SECRETS']
-  fhandle = open('auburn-hacks-gcs.json', 'w')
+  wd = os.getcwd()
+  cred_file_dir = os.path.join(wd, 'auburn-hacks-gcs.json')
+  fhandle = open(cred_file_dir, 'w')
   fhandle.write(gcs_data)
   fhandle.close()
-  return True
+  return cred_file_dir
 
 
 def main():
@@ -113,7 +115,8 @@ def main():
   if args.kube:
     log.info("job running in kubernetes mode.")
     log.info("saving credentials file...")
-    if save_cred_file():
+    cred_file_dir = save_cred_file()
+    if len(cred_file_dir) > 0:
       log.info("credentials downloaded successfully")
   else:
     log.info("job running in normal mode.")
@@ -123,10 +126,13 @@ def main():
   if not args.bucket_name:
     parser.print_help()
     sys.exit(1)
-  
+
   # setting the google cloud storage variable
   os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "./auburn-hacks-gcs.json"
-  
+  if args.kube:
+    log.info("setting the google application env variable")
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = cred_file_dir
+
   if url.scheme != "mongodb":
     log.error("url must be in the form mongodb://*")
     sys.exit(1)
@@ -144,7 +150,7 @@ def main():
 
 
   log.info("will save to file: {}".format(output_dir))
-  
+
   try:
       is_backed = backup_mongo(
         url.netloc,
@@ -160,7 +166,7 @@ def main():
 
       if zip_backup(archive_name, output_dir):
         log.info("backup zipped successfully")
-      
+
       cloud_upload(args.bucket_name, cloud_filename, archive_name)
 
       if cleanup(archive_name, output_dir):
