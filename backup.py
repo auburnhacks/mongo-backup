@@ -25,7 +25,7 @@ def backup_mongo(netloc: str, username: str, password: str,
                 hostname: str, port: int, db: str,
                 output_dir: str) -> bool:
   """
-    backup_mongo is a function that uses the subprocess library to 
+    backup_mongo is a function that uses the subprocess library to
     run the mongodump command and collects the output from the
     output_dir.
 
@@ -184,16 +184,12 @@ def main():
 
       if cleanup(archive_name, output_dir):
         log.info("sucessfully cleaned up everything")
-
-
-    # sending success emails to admins
-    if args.kube:
-        send_success_email()
-
+    
   except subprocess.CalledProcessError as e:
     log.error("error processing command exited with: {}".format(e.returncode))
     log.error("output from error: {}".format(e.output))
     sys.exit(1)
-
+  if args.kube:
+    send_success_email()
 if __name__ == "__main__":
   main()
