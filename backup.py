@@ -3,6 +3,7 @@ import sys
 import logging
 import argparse
 import datetime
+import requests
 import subprocess
 from urllib.parse import urlparse
 from google.cloud import storage
@@ -105,6 +106,18 @@ def save_cred_file() -> str:
   fhandle.close()
   return cred_file_dir
 
+def send_success_email() -> bool:
+    payload = {
+        'to_emails': [
+            'szd0053@tigermail.auburn.edu',
+            'tzj0019@tigermail.auburn.edu'
+        ],
+        'subject': '[AuburnHacks Cluster] - MongoDB update successful',
+        'email_text': 'Hello admins,\n Just finished mongoDB backup. All is well!\nRegards, mongobackup'
+    }
+    requests.post("http://postman-svc/email/send_now", data=payload)
+    return True
+
 
 def main():
   args = parser.parse_args()
@@ -171,6 +184,11 @@ def main():
 
       if cleanup(archive_name, output_dir):
         log.info("sucessfully cleaned up everything")
+
+
+    # sending success emails to admins
+    if args.kube:
+        send_success_email()
 
   except subprocess.CalledProcessError as e:
     log.error("error processing command exited with: {}".format(e.returncode))
