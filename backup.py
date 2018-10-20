@@ -113,7 +113,7 @@ def send_success_email() -> bool:
             'tzj0019@tigermail.auburn.edu'
         ],
         'subject': '[AuburnHacks Cluster] - MongoDB update successful',
-        'email_text': 'Hello admins,\n Just finished mongoDB backup. All is well!\nRegards,\nmongobackup',
+        'email_text': 'Hello admins,\nJust finished mongoDB backup. All is well!\nRegards,\nmongobackup',
     }
     requests.post("http://postman-svc/email/send_now", data=payload)
     return True
